@@ -1,4 +1,4 @@
-name: Pylint
+ename: Pylint
 
 on: [push]
 
