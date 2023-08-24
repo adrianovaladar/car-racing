@@ -11,6 +11,10 @@ def scroll_y(screen_surf, offset_y):
         screen_surf.blit(copy_surf, (0, 0), (0, height - offset_y, width, offset_y))
 
 
+def test_pytest():
+    assert 2 == 2
+
+
 def game():
     # pygame setup
     pygame.init()
