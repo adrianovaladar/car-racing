@@ -18,21 +18,34 @@ def game():
     clock = pygame.time.Clock()
     running = True
     y = 0
+    background = pygame.image.load('road.jpg')
+    car = pygame.image.load('car.png')
+    car = pygame.transform.smoothscale(car, (100, 200))
+    car_coordinates = [screen.get_size()[0] / 2, screen.get_size()[1] - car.get_size()[1]]
+    background = pygame.transform.smoothscale(background, screen.get_size())
     while running:
         # poll for events
         # pygame.QUIT event means the user clicked X to close your window
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    car_coordinates[0] = car_coordinates[0] - 20
+                elif event.key == pygame.K_RIGHT:
+                    car_coordinates[0] = car_coordinates[0] + 20
+                elif event.key == pygame.K_UP:
+                    car_coordinates[1] = car_coordinates[1] - 20
+                elif event.key == pygame.K_DOWN:
+                    car_coordinates[1] = car_coordinates[1] + 20
 
         # fill the screen with a color to wipe away anything from last frame
         screen.fill("gray")
 
         # RENDER YOUR GAME HERE
-        background = pygame.image.load('road.jpg')
-        background = pygame.transform.smoothscale(background, screen.get_size())
         screen.blit(background, (0, 0))
         scroll_y(screen, y)
+        screen.blit(car, car_coordinates)
         y += 2
         if y >= screen.get_size()[1]:
             y = 0
