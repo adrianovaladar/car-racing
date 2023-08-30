@@ -21,7 +21,7 @@ def game():
     background = pygame.image.load('road.jpg')
     car = pygame.image.load('car.png')
     car = pygame.transform.smoothscale(car, (100, 200))
-    car_coordinates = [screen.get_size()[0] / 2, screen.get_size()[1] - car.get_size()[1]]
+    car_coordinates = [(screen.get_size()[0] / 2) - (car.get_size()[0] / 2), screen.get_size()[1] - car.get_size()[1]]
     background = pygame.transform.smoothscale(background, screen.get_size())
     while running:
         # poll for events
