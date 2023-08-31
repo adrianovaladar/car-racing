@@ -1,2 +1,7 @@
+"""tests for game implementation"""
+
+
 def test_pytest():
-    assert 2 == 2
+    """test if pytest is working"""
+    var_test = 2
+    assert var_test == 2
