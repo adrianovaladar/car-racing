@@ -1,5 +1,50 @@
 """car racing game implementation"""
 import pygame
+from enum import Enum
+
+
+class GameStatus(Enum):
+    MENU = 1
+    GAME = 2
+    QUIT = 3
+
+
+class OptionSelected(Enum):
+    START = 1
+    QUIT = 2
+
+
+white = (255, 255, 255)
+black = (0, 0, 0)
+gray = (50, 50, 50)
+red = (255, 0, 0)
+green = (0, 255, 0)
+blue = (0, 0, 255)
+yellow = (255, 255, 0)
+orange = (255, 128, 0)
+font = "Retro.ttf"
+move_step = 5
+
+
+def text_format(message, text_font, text_size, text_color):
+    new_font = pygame.font.Font(text_font, text_size)
+    new_text = new_font.render(message, 0, text_color)
+    return new_text
+
+
+def handle_pressed_keys(car, car_coordinates, screen):
+    """function to handle pressed keys"""
+    pressed_keys = pygame.key.get_pressed()
+    if pressed_keys[pygame.K_LEFT] and car_coordinates[0] - move_step >= 0:
+        car_coordinates[0] = car_coordinates[0] - move_step
+    if (pressed_keys[pygame.K_RIGHT]
+            and car_coordinates[0] + move_step <= screen.get_size()[0] - car.get_size()[0]):
+        car_coordinates[0] = car_coordinates[0] + move_step
+    if pressed_keys[pygame.K_UP] and car_coordinates[1] - move_step >= 0:
+        car_coordinates[1] = car_coordinates[1] - move_step
+    if (pressed_keys[pygame.K_DOWN]
+            and car_coordinates[1] + move_step <= screen.get_size()[1] - car.get_size()[1]):
+        car_coordinates[1] = car_coordinates[1] + move_step
 
 
 def scroll_y(screen_surf, offset_y):
@@ -13,57 +58,91 @@ def scroll_y(screen_surf, offset_y):
         screen_surf.blit(copy_surf, (0, 0), (0, height - offset_y, width, offset_y))
 
 
-def handle_pressed_keys(car, car_coordinates, screen):
-    """function to handle pressed keys"""
-    pressed_keys = pygame.key.get_pressed()
-    if pressed_keys[pygame.K_LEFT] and car_coordinates[0] - 5 >= 0:
-        car_coordinates[0] = car_coordinates[0] - 5
-    if pressed_keys[pygame.K_RIGHT] and car_coordinates[0] + 5 <= screen.get_size()[0] - car.get_size()[0]:
-        car_coordinates[0] = car_coordinates[0] + 5
-    if pressed_keys[pygame.K_UP] and car_coordinates[1] - 5 >= 0:
-        car_coordinates[1] = car_coordinates[1] - 5
-    if pressed_keys[pygame.K_DOWN] and car_coordinates[1] + 5 <= screen.get_size()[1] - car.get_size()[1]:
-        car_coordinates[1] = car_coordinates[1] + 5
+class Game:
+    def __init__(self):
+        self.background_scroll_offset = 0
+        # pygame setup
+        self.game_status = GameStatus.MENU
+        pygame.init()
+        pygame.display.set_caption('Car Racing Game')
+        self.screen = pygame.display.set_mode((720, 720))
+        self.clock = pygame.time.Clock()
+        self.running = True
+        self.background = pygame.image.load('road.jpg')
+        self.car = pygame.image.load('car.png')
+        self.car = pygame.transform.smoothscale(self.car, (100, 200))
+        self.car_coordinates = [(self.screen.get_size()[0] / 2) - (self.car.get_size()[0] / 2),
+                                self.screen.get_size()[1] - self.car.get_size()[1]]
+        self.background = pygame.transform.smoothscale(self.background, self.screen.get_size())
+        self.option_selected = OptionSelected.START
 
+    def main_menu(self):
+        pressed_keys = pygame.key.get_pressed()
+        if pressed_keys[pygame.K_UP] and self.option_selected != OptionSelected.START:
+            self.option_selected = OptionSelected.START
+        elif pressed_keys[pygame.K_DOWN] and self.option_selected != OptionSelected.QUIT:
+            self.option_selected = OptionSelected.QUIT
+        if pressed_keys[pygame.K_RETURN]:
+            if self.option_selected == OptionSelected.START:
+                self.game_status = GameStatus.GAME
+            if self.option_selected == OptionSelected.QUIT:
+                self.game_status = GameStatus.QUIT
+        self.screen.fill(gray)
+        title = text_format('Car Racing Game', font, 90, orange)
+        if self.option_selected == OptionSelected.START:
+            text_start = text_format("START", font, 75, white)
+        else:
+            text_start = text_format("START", font, 75, black)
+        if self.option_selected == OptionSelected.QUIT:
+            text_quit = text_format("QUIT", font, 75, white)
+        else:
+            text_quit = text_format("QUIT", font, 75, black)
 
-def game():
-    """game logic"""
-    # pygame setup
-    pygame.init()
-    screen = pygame.display.set_mode((900, 720))
-    clock = pygame.time.Clock()
-    running = True
-    background_scroll_offset = 0
-    background = pygame.image.load('road.jpg')
-    car = pygame.image.load('car.png')
-    car = pygame.transform.smoothscale(car, (100, 200))
-    car_coordinates = [(screen.get_size()[0] / 2) - (car.get_size()[0] / 2), screen.get_size()[1] - car.get_size()[1]]
-    background = pygame.transform.smoothscale(background, screen.get_size())
-    while running:
-        # poll for events
-        # pygame.QUIT event means the user clicked X to close your window
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-        handle_pressed_keys(car, car_coordinates, screen)
-        # fill the screen with a color to wipe away anything from last frame
-        screen.fill("gray")
+        title_rect = title.get_rect()
+        start_rect = text_start.get_rect()
+        quit_rect = text_quit.get_rect()
 
+        # Main Menu Text
+        self.screen.blit(title, (self.screen.get_size()[0] / 2 - (title_rect[2] / 2), 80))
+        self.screen.blit(text_start, (self.screen.get_size()[0] / 2 - (start_rect[2] / 2), 300))
+        self.screen.blit(text_quit, (self.screen.get_size()[0] / 2 - (quit_rect[2] / 2), 360))
+        pygame.display.update()
+        # clock.tick(FPS)
+
+    def run_game(self):
         # RENDER YOUR GAME HERE
-        screen.blit(background, (0, 0))
-        scroll_y(screen, background_scroll_offset)
-        screen.blit(car, car_coordinates)
-        background_scroll_offset += 2
-        if background_scroll_offset >= screen.get_size()[1]:
-            background_scroll_offset = 0
+        self.screen.blit(self.background, (0, 0))
+        scroll_y(self.screen, self.background_scroll_offset)
+        self.screen.blit(self.car, self.car_coordinates)
+        self.background_scroll_offset += 2
+        if self.background_scroll_offset >= self.screen.get_size()[1]:
+            self.background_scroll_offset = 0
         # flip() the display to put your work on screen
         pygame.display.flip()
+        handle_pressed_keys(self.car, self.car_coordinates, self.screen)
 
-        clock.tick(60)  # limits FPS to 60
+    def run(self):
+        """game logic"""
+        while self.running:
+            # poll for events
+            # pygame.QUIT event means the user clicked X to close your window
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
+            # fill the screen with a color to wipe away anything from last frame
+            self.screen.fill("gray")
+            if self.game_status == GameStatus.MENU:
+                self.main_menu()
+            elif self.game_status == GameStatus.GAME:
+                self.run_game()
+            elif self.game_status == GameStatus.QUIT:
+                self.running = False
 
-    pygame.quit()
+            self.clock.tick(60)  # limits FPS to 60
+
+        pygame.quit()
 
 
 if __name__ == '__main__':
-    game()
-
+    game = Game()
+    game.run()
