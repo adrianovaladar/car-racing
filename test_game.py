@@ -51,6 +51,7 @@ def run_test_handle_pressed_keys(key, direction=Direction.NONE):
             assert car_coordinates_before[1] - move_step == car_coordinates_after[1]
     else:
         assert car_coordinates_before == car_coordinates_after
+    key_states[key] = 0
 
 
 def test_handle_pressed_keys_right():
