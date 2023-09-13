@@ -1,15 +1,17 @@
 """car racing game implementation"""
-import pygame
 from enum import Enum
+import pygame
 
 
 class GameStatus(Enum):
+    """Enum for game status"""
     MENU = 1
     GAME = 2
     QUIT = 3
 
 
 class OptionSelected(Enum):
+    """Enum for option selected in menu"""
     START = 1
     QUIT = 2
 
@@ -22,11 +24,12 @@ green = (0, 255, 0)
 blue = (0, 0, 255)
 yellow = (255, 255, 0)
 orange = (255, 128, 0)
-font = "Retro.ttf"
-move_step = 5
+FONT = "Retro.ttf"
+MOVE_STEP = 5
 
 
 def text_format(message, text_font, text_size, text_color):
+    """Format text for menu"""
     new_font = pygame.font.Font(text_font, text_size)
     new_text = new_font.render(message, 0, text_color)
     return new_text
@@ -35,16 +38,16 @@ def text_format(message, text_font, text_size, text_color):
 def handle_pressed_keys(car, car_coordinates, screen):
     """function to handle pressed keys"""
     pressed_keys = pygame.key.get_pressed()
-    if pressed_keys[pygame.K_LEFT] and car_coordinates[0] - move_step >= 0:
-        car_coordinates[0] = car_coordinates[0] - move_step
+    if pressed_keys[pygame.K_LEFT] and car_coordinates[0] - MOVE_STEP >= 0:
+        car_coordinates[0] = car_coordinates[0] - MOVE_STEP
     if (pressed_keys[pygame.K_RIGHT]
-            and car_coordinates[0] + move_step <= screen.get_size()[0] - car.get_size()[0]):
-        car_coordinates[0] = car_coordinates[0] + move_step
-    if pressed_keys[pygame.K_UP] and car_coordinates[1] - move_step >= 0:
-        car_coordinates[1] = car_coordinates[1] - move_step
+            and car_coordinates[0] + MOVE_STEP <= screen.get_size()[0] - car.get_size()[0]):
+        car_coordinates[0] = car_coordinates[0] + MOVE_STEP
+    if pressed_keys[pygame.K_UP] and car_coordinates[1] - MOVE_STEP >= 0:
+        car_coordinates[1] = car_coordinates[1] - MOVE_STEP
     if (pressed_keys[pygame.K_DOWN]
-            and car_coordinates[1] + move_step <= screen.get_size()[1] - car.get_size()[1]):
-        car_coordinates[1] = car_coordinates[1] + move_step
+            and car_coordinates[1] + MOVE_STEP <= screen.get_size()[1] - car.get_size()[1]):
+        car_coordinates[1] = car_coordinates[1] + MOVE_STEP
 
 
 def scroll_y(screen_surf, offset_y):
@@ -59,6 +62,7 @@ def scroll_y(screen_surf, offset_y):
 
 
 class Game:
+    """Game class"""
     def __init__(self):
         self.background_scroll_offset = 0
         # pygame setup
@@ -77,6 +81,7 @@ class Game:
         self.option_selected = OptionSelected.START
 
     def main_menu(self):
+        """Main menu function"""
         pressed_keys = pygame.key.get_pressed()
         if pressed_keys[pygame.K_UP] and self.option_selected != OptionSelected.START:
             self.option_selected = OptionSelected.START
@@ -88,15 +93,15 @@ class Game:
             if self.option_selected == OptionSelected.QUIT:
                 self.game_status = GameStatus.QUIT
         self.screen.fill(gray)
-        title = text_format('Car Racing Game', font, 90, orange)
+        title = text_format('Car Racing Game', FONT, 90, orange)
         if self.option_selected == OptionSelected.START:
-            text_start = text_format("START", font, 75, white)
+            text_start = text_format("START", FONT, 75, white)
         else:
-            text_start = text_format("START", font, 75, black)
+            text_start = text_format("START", FONT, 75, black)
         if self.option_selected == OptionSelected.QUIT:
-            text_quit = text_format("QUIT", font, 75, white)
+            text_quit = text_format("QUIT", FONT, 75, white)
         else:
-            text_quit = text_format("QUIT", font, 75, black)
+            text_quit = text_format("QUIT", FONT, 75, black)
 
         title_rect = title.get_rect()
         start_rect = text_start.get_rect()
@@ -110,6 +115,7 @@ class Game:
         # clock.tick(FPS)
 
     def run_game(self):
+        """Function for running the game"""
         # RENDER YOUR GAME HERE
         self.screen.blit(self.background, (0, 0))
         scroll_y(self.screen, self.background_scroll_offset)

@@ -1,9 +1,10 @@
 """tests for game implementation"""
 
-from main import *
 from unittest.mock import MagicMock
+from enum import Enum
+import pygame
+from main import Game, handle_pressed_keys, MOVE_STEP
 
-from main import Game
 
 pygame.K_RIGHT = 0
 pygame.K_LEFT = 1
@@ -15,6 +16,7 @@ pygame.key.get_pressed = MagicMock(return_value=[0] * 10)
 
 
 class Direction(Enum):
+    """Enum for direction"""
     NONE = 0
     LEFT = 1
     RIGHT = 2
@@ -27,28 +29,31 @@ def run_test_handle_pressed_keys(key, direction=Direction.NONE):
     test_game = Game()
     key_states = pygame.key.get_pressed()
     if direction == Direction.NONE:
-        test_game.car_coordinates = [test_game.screen.get_size()[0] / 2, test_game.screen.get_size()[1] / 2]
+        test_game.car_coordinates = [test_game.screen.get_size()[0] / 2,
+                                     test_game.screen.get_size()[1] / 2]
     elif direction == Direction.UP:
         test_game.car_coordinates = [test_game.screen.get_size()[0] / 2, 0]
     elif direction == Direction.DOWN:
-        test_game.car_coordinates = [test_game.screen.get_size()[0] / 2, test_game.screen.get_size()[1]]
+        test_game.car_coordinates = [test_game.screen.get_size()[0] / 2,
+                                     test_game.screen.get_size()[1]]
     elif direction == Direction.LEFT:
         test_game.car_coordinates = [0, test_game.screen.get_size()[1] / 2]
     elif direction == Direction.RIGHT:
-        test_game.car_coordinates = [test_game.screen.get_size()[0], test_game.screen.get_size()[1] / 2]
+        test_game.car_coordinates = [test_game.screen.get_size()[0],
+                                     test_game.screen.get_size()[1] / 2]
     key_states[key] = 1
     car_coordinates_before = list(test_game.car_coordinates)
     handle_pressed_keys(test_game.car, test_game.car_coordinates, test_game.screen)
     car_coordinates_after = test_game.car_coordinates
     if direction == Direction.NONE:
         if key == pygame.K_RIGHT:
-            assert car_coordinates_before[0] + move_step == car_coordinates_after[0]
+            assert car_coordinates_before[0] + MOVE_STEP == car_coordinates_after[0]
         elif key == pygame.K_LEFT:
-            assert car_coordinates_before[0] - move_step == car_coordinates_after[0]
+            assert car_coordinates_before[0] - MOVE_STEP == car_coordinates_after[0]
         if key == pygame.K_DOWN:
-            assert car_coordinates_before[1] + move_step == car_coordinates_after[1]
+            assert car_coordinates_before[1] + MOVE_STEP == car_coordinates_after[1]
         elif key == pygame.K_UP:
-            assert car_coordinates_before[1] - move_step == car_coordinates_after[1]
+            assert car_coordinates_before[1] - MOVE_STEP == car_coordinates_after[1]
     else:
         assert car_coordinates_before == car_coordinates_after
     key_states[key] = 0
