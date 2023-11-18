@@ -1,5 +1,6 @@
 """car racing game implementation"""
 from enum import Enum
+import random
 import pygame
 
 
@@ -63,6 +64,9 @@ def scroll_y(screen_surf, offset_y):
 
 class Game:
     """Game class"""
+
+    # pylint: disable=too-many-instance-attributes
+    # The number of attributes is reasonable in this case.
     def __init__(self):
         self.background_scroll_offset = 0
         # pygame setup
@@ -77,8 +81,12 @@ class Game:
         self.car = pygame.transform.smoothscale(self.car, (100, 200))
         self.car_coordinates = [(self.screen.get_size()[0] / 2) - (self.car.get_size()[0] / 2),
                                 self.screen.get_size()[1] - self.car.get_size()[1]]
+        self.other_car = pygame.image.load('car.png')
+        self.other_car = pygame.transform.smoothscale(self.car, (100, 200))
         self.background = pygame.transform.smoothscale(self.background, self.screen.get_size())
         self.option_selected = OptionSelected.START
+        self.other_car_coordinates = [random.randrange(0, self.screen.get_size()[0]
+                                                       - self.other_car.get_size()[0]), -300]
 
     def main_menu(self):
         """Main menu function"""
@@ -114,18 +122,36 @@ class Game:
         pygame.display.update()
         # clock.tick(FPS)
 
+    def is_game_over(self):
+        """Logic for game over"""
+        if (self.other_car_coordinates[0] <= self.car_coordinates[0] <=
+            self.other_car.get_size()[0] + self.other_car_coordinates[0] and
+            self.other_car_coordinates[1] <= self.car_coordinates[1]
+                <= self.other_car.get_size()[1] + self.other_car_coordinates[1] or
+            self.other_car_coordinates[0] <= self.car_coordinates[0] + self.car.get_size()[0] <=
+                self.other_car.get_size()[0] + self.other_car_coordinates[0] and
+            self.other_car_coordinates[1] <= self.car_coordinates[1] + self.car.get_size()[1]
+                <= self.other_car.get_size()[1] + self.other_car_coordinates[1]):
+            return True
+        return False
+
     def run_game(self):
         """Function for running the game"""
         # RENDER YOUR GAME HERE
         self.screen.blit(self.background, (0, 0))
         scroll_y(self.screen, self.background_scroll_offset)
         self.screen.blit(self.car, self.car_coordinates)
+        self.screen.blit(self.other_car, self.other_car_coordinates)
         self.background_scroll_offset += 2
         if self.background_scroll_offset >= self.screen.get_size()[1]:
             self.background_scroll_offset = 0
         # flip() the display to put your work on screen
         pygame.display.flip()
         handle_pressed_keys(self.car, self.car_coordinates, self.screen)
+        self.other_car_coordinates[1] += 2
+        if self.other_car_coordinates[1] == 30 + self.screen.get_size()[1]:
+            self.other_car_coordinates = [random.randrange(0, self.screen.get_size()[0]
+                                                           - self.other_car.get_size()[0]), -200]
 
     def run(self):
         """game logic"""
@@ -141,6 +167,8 @@ class Game:
                 self.main_menu()
             elif self.game_status == GameStatus.GAME:
                 self.run_game()
+                if self.is_game_over():
+                    self.running = False
             elif self.game_status == GameStatus.QUIT:
                 self.running = False
 

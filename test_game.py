@@ -97,3 +97,21 @@ def test_handle_pressed_keys_up_limit():
 def test_handle_pressed_keys_down_limit():
     """Tests if the car does not move when it is in the lower limit"""
     run_test_handle_pressed_keys(pygame.K_DOWN, Direction.DOWN)
+
+
+def test_is_game_over():
+    """Test for the case of game over equals true"""
+    test_game = Game()
+    test_game.car_coordinates = [2, 2]
+    test_game.other_car_coordinates = [2,2]
+    assert test_game.is_game_over()
+
+
+def test_is_not__game_over():
+    """Test for the case of game over equals true"""
+    test_game = Game()
+    test_game.car_coordinates = [2,2]
+    test_game.other_car_coordinates = [test_game.car.get_size()[0] + 100,
+                                       test_game.car.get_size()[1] + 100]
+    assert not test_game.is_game_over()
+    
