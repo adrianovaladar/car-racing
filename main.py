@@ -10,6 +10,7 @@ class GameStatus(Enum):
     GAME = 2
     QUIT = 3
     GAME_OVER = 4
+    PAUSE = 5
 
 
 class OptionSelected(Enum):
@@ -39,21 +40,6 @@ def text_format(message, text_font, text_size, text_color):
     return new_text
 
 
-def handle_pressed_keys(car, car_coordinates, screen):
-    """function to handle pressed keys"""
-    pressed_keys = pygame.key.get_pressed()
-    if pressed_keys[pygame.K_LEFT] and car_coordinates[0] - MOVE_STEP >= 0:
-        car_coordinates[0] = car_coordinates[0] - MOVE_STEP
-    if (pressed_keys[pygame.K_RIGHT]
-            and car_coordinates[0] + MOVE_STEP <= screen.get_size()[0] - car.get_size()[0]):
-        car_coordinates[0] = car_coordinates[0] + MOVE_STEP
-    if pressed_keys[pygame.K_UP] and car_coordinates[1] - MOVE_STEP >= 0:
-        car_coordinates[1] = car_coordinates[1] - MOVE_STEP
-    if (pressed_keys[pygame.K_DOWN]
-            and car_coordinates[1] + MOVE_STEP <= screen.get_size()[1] - car.get_size()[1]):
-        car_coordinates[1] = car_coordinates[1] + MOVE_STEP
-
-
 def scroll_y(screen_surf, offset_y):
     """function to scroll the road"""
     width, height = screen_surf.get_size()
@@ -77,7 +63,6 @@ class Game:
         pygame.init()
         pygame.display.set_caption('Car Racing Game')
         self.screen = pygame.display.set_mode((720, 720))
-        self.screen_game_over = pygame.Surface((720, 720), pygame.SRCALPHA)
         self.clock = pygame.time.Clock()
         self.running = True
         self.background = pygame.image.load('images/road.jpg')
@@ -91,6 +76,22 @@ class Game:
         self.option_selected = OptionSelected.START
         self.other_car_coordinates = [random.randrange(0, self.screen.get_size()[0]
                                                        - self.other_car.get_size()[0]), -300]
+
+    def handle_pressed_keys(self, car, car_coordinates, screen):
+        """function to handle pressed keys"""
+        pressed_keys = pygame.key.get_pressed()
+        if pressed_keys[pygame.K_LEFT] and car_coordinates[0] - MOVE_STEP >= 0:
+            car_coordinates[0] = car_coordinates[0] - MOVE_STEP
+        if (pressed_keys[pygame.K_RIGHT]
+                and car_coordinates[0] + MOVE_STEP <= screen.get_size()[0] - car.get_size()[0]):
+            car_coordinates[0] = car_coordinates[0] + MOVE_STEP
+        if pressed_keys[pygame.K_UP] and car_coordinates[1] - MOVE_STEP >= 0:
+            car_coordinates[1] = car_coordinates[1] - MOVE_STEP
+        if (pressed_keys[pygame.K_DOWN]
+                and car_coordinates[1] + MOVE_STEP <= screen.get_size()[1] - car.get_size()[1]):
+            car_coordinates[1] = car_coordinates[1] + MOVE_STEP
+        if pressed_keys[pygame.K_p]:
+            self.game_status = GameStatus.PAUSE
 
     def restart_game(self):
         """This function restarts the position of the cars
@@ -132,31 +133,43 @@ class Game:
         pygame.display.update()
         # clock.tick(FPS)
 
-    def game_over_screen(self):
+    def screen_game_over(self):
         """Function to show the game over screen"""
         text_game_over = text_format("GAME OVER", FONT, 75, yellow)
         text_try_again = text_format("PRESS ANY KEY", FONT, 75, yellow)
         rect_game_over = text_game_over.get_rect()
         rect_try_again = text_try_again.get_rect()
-        self.screen_game_over.blit(text_game_over, ((self.screen_game_over.get_size()[0] / 2) -
-                                                    (rect_game_over[2] / 2), 200))
-        self.screen_game_over.blit(text_try_again, ((self.screen_game_over.get_size()[0] / 2) -
-                                                    (rect_try_again[2] / 2), 260))
-        self.screen.blit(self.screen_game_over, (0, 0))
+        self.screen.blit(text_game_over, ((self.screen.get_size()[0] / 2) -
+                                          (rect_game_over[2] / 2), 200))
+        self.screen.blit(text_try_again, ((self.screen.get_size()[0] / 2) -
+                                          (rect_try_again[2] / 2), 260))
+        # self.screen.blit(self.screen_game_over, (0, 0))
         pygame.display.update()
 
     def is_game_over(self):
         """Logic for game over"""
         if (self.other_car_coordinates[0] <= self.car_coordinates[0] <=
-            self.other_car.get_size()[0] + self.other_car_coordinates[0] and
-            self.other_car_coordinates[1] <= self.car_coordinates[1]
-                <= self.other_car.get_size()[1] + self.other_car_coordinates[1] or
-            self.other_car_coordinates[0] <= self.car_coordinates[0] + self.car.get_size()[0] <=
                 self.other_car.get_size()[0] + self.other_car_coordinates[0] and
-            self.other_car_coordinates[1] <= self.car_coordinates[1] + self.car.get_size()[1]
+                self.other_car_coordinates[1] <= self.car_coordinates[1]
+                <= self.other_car.get_size()[1] + self.other_car_coordinates[1] or
+                self.other_car_coordinates[0] <= self.car_coordinates[0] + self.car.get_size()[0] <=
+                self.other_car.get_size()[0] + self.other_car_coordinates[0] and
+                self.other_car_coordinates[1] <= self.car_coordinates[1] + self.car.get_size()[1]
                 <= self.other_car.get_size()[1] + self.other_car_coordinates[1]):
             return True
         return False
+
+    def screen_pause(self):
+        """Function to show the pause screen"""
+        text_pause = text_format("PAUSE", FONT, 75, yellow)
+        text_resume = text_format("PRESS R TO RESUME", FONT, 75, yellow)
+        rect_pause = text_pause.get_rect()
+        rect_resume = text_resume.get_rect()
+        self.screen.blit(text_pause, ((self.screen.get_size()[0] / 2) -
+                                      (rect_pause[2] / 2), 200))
+        self.screen.blit(text_resume, ((self.screen.get_size()[0] / 2) -
+                                       (rect_resume[2] / 2), 260))
+        pygame.display.update()
 
     def run_game(self):
         """Function for running the game"""
@@ -170,7 +183,7 @@ class Game:
             self.background_scroll_offset = 0
         # flip() the display to put your work on screen
         pygame.display.flip()
-        handle_pressed_keys(self.car, self.car_coordinates, self.screen)
+        self.handle_pressed_keys(self.car, self.car_coordinates, self.screen)
         self.other_car_coordinates[1] += 2
         if self.other_car_coordinates[1] == 30 + self.screen.get_size()[1]:
             self.other_car_coordinates = [random.randrange(0, self.screen.get_size()[0]
@@ -192,8 +205,13 @@ class Game:
                 self.run_game()
                 if self.is_game_over():
                     self.game_status = GameStatus.GAME_OVER
+            if self.game_status == GameStatus.PAUSE:
+                self.screen_pause()
+                pressed_keys = pygame.key.get_pressed()
+                if pressed_keys[pygame.K_r]:
+                    self.game_status = GameStatus.GAME
             if self.game_status == GameStatus.GAME_OVER:
-                self.game_over_screen()
+                self.screen_game_over()
                 for event in pygame.event.get():
                     if event.type == pygame.KEYDOWN:
                         self.game_status = GameStatus.MENU
