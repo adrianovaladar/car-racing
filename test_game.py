@@ -3,13 +3,14 @@
 from unittest.mock import MagicMock
 from enum import Enum
 import pygame
-from main import Game, handle_pressed_keys, MOVE_STEP
+from main import Game, MOVE_STEP
 
 
 pygame.K_RIGHT = 0
 pygame.K_LEFT = 1
 pygame.K_UP = 2
 pygame.K_DOWN = 3
+pygame.K_p = 4
 
 
 pygame.key.get_pressed = MagicMock(return_value=[0] * 10)
@@ -43,7 +44,7 @@ def run_test_handle_pressed_keys(key, direction=Direction.NONE):
                                      test_game.screen.get_size()[1] / 2]
     key_states[key] = 1
     car_coordinates_before = list(test_game.car_coordinates)
-    handle_pressed_keys(test_game.car, test_game.car_coordinates, test_game.screen)
+    test_game.handle_pressed_keys(test_game.car, test_game.car_coordinates, test_game.screen)
     car_coordinates_after = test_game.car_coordinates
     if direction == Direction.NONE:
         if key == pygame.K_RIGHT:
