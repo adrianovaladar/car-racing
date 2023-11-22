@@ -9,6 +9,7 @@ class GameStatus(Enum):
     MENU = 1
     GAME = 2
     QUIT = 3
+    GAME_OVER = 4
 
 
 class OptionSelected(Enum):
@@ -27,6 +28,8 @@ yellow = (255, 255, 0)
 orange = (255, 128, 0)
 FONT = "Retro.ttf"
 MOVE_STEP = 5
+
+width = height = 720
 
 
 def text_format(message, text_font, text_size, text_color):
@@ -53,13 +56,13 @@ def handle_pressed_keys(car, car_coordinates, screen):
 
 def scroll_y(screen_surf, offset_y):
     """function to scroll the road"""
-    width, height = screen_surf.get_size()
+    w, h = screen_surf.get_size()
     copy_surf = screen_surf.copy()
     screen_surf.blit(copy_surf, (0, offset_y))
     if offset_y < 0:
-        screen_surf.blit(copy_surf, (0, height + offset_y), (0, 0, width, -offset_y))
+        screen_surf.blit(copy_surf, (0, h + offset_y), (0, 0, w, -offset_y))
     else:
-        screen_surf.blit(copy_surf, (0, 0), (0, height - offset_y, width, offset_y))
+        screen_surf.blit(copy_surf, (0, 0), (0, h - offset_y, w, offset_y))
 
 
 class Game:
@@ -74,6 +77,7 @@ class Game:
         pygame.init()
         pygame.display.set_caption('Car Racing Game')
         self.screen = pygame.display.set_mode((720, 720))
+        self.screen_game_over = pygame.Surface((720, 720), pygame.SRCALPHA)
         self.clock = pygame.time.Clock()
         self.running = True
         self.background = pygame.image.load('road.jpg')
@@ -85,6 +89,12 @@ class Game:
         self.other_car = pygame.transform.smoothscale(self.car, (100, 200))
         self.background = pygame.transform.smoothscale(self.background, self.screen.get_size())
         self.option_selected = OptionSelected.START
+        self.other_car_coordinates = [random.randrange(0, self.screen.get_size()[0]
+                                                       - self.other_car.get_size()[0]), -300]
+
+    def restart_game(self):
+        self.car_coordinates = [(self.screen.get_size()[0] / 2) - (self.car.get_size()[0] / 2),
+                                self.screen.get_size()[1] - self.car.get_size()[1]]
         self.other_car_coordinates = [random.randrange(0, self.screen.get_size()[0]
                                                        - self.other_car.get_size()[0]), -300]
 
@@ -115,12 +125,22 @@ class Game:
         start_rect = text_start.get_rect()
         quit_rect = text_quit.get_rect()
 
-        # Main Menu Text
-        self.screen.blit(title, (self.screen.get_size()[0] / 2 - (title_rect[2] / 2), 80))
         self.screen.blit(text_start, (self.screen.get_size()[0] / 2 - (start_rect[2] / 2), 300))
         self.screen.blit(text_quit, (self.screen.get_size()[0] / 2 - (quit_rect[2] / 2), 360))
         pygame.display.update()
         # clock.tick(FPS)
+
+    def game_over_screen(self):
+        text_game_over = text_format("GAME OVER", FONT, 75, yellow)
+        text_try_again = text_format("PRESS ANY KEY", FONT, 75, yellow)
+        rect_game_over = text_game_over.get_rect()
+        rect_try_again = text_try_again.get_rect()
+        self.screen_game_over.blit(text_game_over, ((self.screen_game_over.get_size()[0] / 2) -
+                                                    (rect_game_over[2] / 2), 200))
+        self.screen_game_over.blit(text_try_again, ((self.screen_game_over.get_size()[0] / 2) -
+                                                    (rect_try_again[2] / 2), 260))
+        self.screen.blit(self.screen_game_over, (0, 0))
+        pygame.display.update()
 
     def is_game_over(self):
         """Logic for game over"""
@@ -155,6 +175,7 @@ class Game:
 
     def run(self):
         """game logic"""
+        self.screen.fill("gray")
         while self.running:
             # poll for events
             # pygame.QUIT event means the user clicked X to close your window
@@ -162,13 +183,18 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.running = False
             # fill the screen with a color to wipe away anything from last frame
-            self.screen.fill("gray")
             if self.game_status == GameStatus.MENU:
                 self.main_menu()
             elif self.game_status == GameStatus.GAME:
                 self.run_game()
                 if self.is_game_over():
-                    self.running = False
+                    self.game_status = GameStatus.GAME_OVER
+            if self.game_status == GameStatus.GAME_OVER:
+                self.game_over_screen()
+                for event in pygame.event.get():
+                    if event.type == pygame.KEYDOWN:
+                        self.game_status = GameStatus.MENU
+                        self.restart_game()
             elif self.game_status == GameStatus.QUIT:
                 self.running = False
 
