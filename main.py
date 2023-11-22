@@ -80,13 +80,13 @@ class Game:
         self.screen_game_over = pygame.Surface((720, 720), pygame.SRCALPHA)
         self.clock = pygame.time.Clock()
         self.running = True
-        self.background = pygame.image.load('road.jpg')
-        self.car = pygame.image.load('car.png')
+        self.background = pygame.image.load('images/road.jpg')
+        self.car = pygame.image.load('images/car.png')
         self.car = pygame.transform.smoothscale(self.car, (100, 200))
         self.car_coordinates = [(self.screen.get_size()[0] / 2) - (self.car.get_size()[0] / 2),
                                 self.screen.get_size()[1] - self.car.get_size()[1]]
-        self.other_car = pygame.image.load('car.png')
-        self.other_car = pygame.transform.smoothscale(self.car, (100, 200))
+        self.other_car = pygame.image.load('images/other_car.png')
+        self.other_car = pygame.transform.smoothscale(self.other_car, (100, 200))
         self.background = pygame.transform.smoothscale(self.background, self.screen.get_size())
         self.option_selected = OptionSelected.START
         self.other_car_coordinates = [random.randrange(0, self.screen.get_size()[0]
