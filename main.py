@@ -113,11 +113,11 @@ class Game:
         self.screen.fill(gray)
         title = text_format('Car Racing Game', FONT, 90, orange)
         if self.option_selected == OptionSelected.START:
-            text_start = text_format("START", FONT, 75, white)
+            text_start = text_format("START", FONT, 75, yellow)
         else:
             text_start = text_format("START", FONT, 75, black)
         if self.option_selected == OptionSelected.QUIT:
-            text_quit = text_format("QUIT", FONT, 75, white)
+            text_quit = text_format("QUIT", FONT, 75, yellow)
         else:
             text_quit = text_format("QUIT", FONT, 75, black)
 
