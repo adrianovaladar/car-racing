@@ -29,7 +29,7 @@ orange = (255, 128, 0)
 FONT = "Retro.ttf"
 MOVE_STEP = 5
 
-width = height = 720
+WIDTH = HEIGHT = 720
 
 
 def text_format(message, text_font, text_size, text_color):
@@ -56,13 +56,13 @@ def handle_pressed_keys(car, car_coordinates, screen):
 
 def scroll_y(screen_surf, offset_y):
     """function to scroll the road"""
-    w, h = screen_surf.get_size()
+    width, height = screen_surf.get_size()
     copy_surf = screen_surf.copy()
     screen_surf.blit(copy_surf, (0, offset_y))
     if offset_y < 0:
-        screen_surf.blit(copy_surf, (0, h + offset_y), (0, 0, w, -offset_y))
+        screen_surf.blit(copy_surf, (0, height + offset_y), (0, 0, width, -offset_y))
     else:
-        screen_surf.blit(copy_surf, (0, 0), (0, h - offset_y, w, offset_y))
+        screen_surf.blit(copy_surf, (0, 0), (0, height - offset_y, width, offset_y))
 
 
 class Game:
@@ -93,6 +93,8 @@ class Game:
                                                        - self.other_car.get_size()[0]), -300]
 
     def restart_game(self):
+        """This function restarts the position of the cars
+        in order to play again from the same position"""
         self.car_coordinates = [(self.screen.get_size()[0] / 2) - (self.car.get_size()[0] / 2),
                                 self.screen.get_size()[1] - self.car.get_size()[1]]
         self.other_car_coordinates = [random.randrange(0, self.screen.get_size()[0]
@@ -111,7 +113,7 @@ class Game:
             if self.option_selected == OptionSelected.QUIT:
                 self.game_status = GameStatus.QUIT
         self.screen.fill(gray)
-        title = text_format('Car Racing Game', FONT, 90, orange)
+        # title = text_format('Car Racing Game', FONT, 90, orange)
         if self.option_selected == OptionSelected.START:
             text_start = text_format("START", FONT, 75, yellow)
         else:
@@ -121,7 +123,7 @@ class Game:
         else:
             text_quit = text_format("QUIT", FONT, 75, black)
 
-        title_rect = title.get_rect()
+        # title_rect = title.get_rect()
         start_rect = text_start.get_rect()
         quit_rect = text_quit.get_rect()
 
@@ -131,6 +133,7 @@ class Game:
         # clock.tick(FPS)
 
     def game_over_screen(self):
+        """Function to show the game over screen"""
         text_game_over = text_format("GAME OVER", FONT, 75, yellow)
         text_try_again = text_format("PRESS ANY KEY", FONT, 75, yellow)
         rect_game_over = text_game_over.get_rect()
