@@ -76,6 +76,7 @@ class Game:
         self.option_selected = OptionSelected.START
         self.other_car_coordinates = [random.randrange(0, self.screen.get_size()[0]
                                                        - self.other_car.get_size()[0]), -300]
+        self.score = 0
 
     def handle_pressed_keys(self, car, car_coordinates, screen):
         """function to handle pressed keys"""
@@ -100,6 +101,7 @@ class Game:
                                 self.screen.get_size()[1] - self.car.get_size()[1]]
         self.other_car_coordinates = [random.randrange(0, self.screen.get_size()[0]
                                                        - self.other_car.get_size()[0]), -300]
+        self.score = 0
 
     def main_menu(self):
         """Main menu function"""
@@ -176,8 +178,11 @@ class Game:
         # RENDER YOUR GAME HERE
         self.screen.blit(self.background, (0, 0))
         scroll_y(self.screen, self.background_scroll_offset)
+        text_score = text_format("SCORE: " + str(self.score), FONT, 25, yellow)
+        rect_score = text_score.get_rect()
         self.screen.blit(self.car, self.car_coordinates)
         self.screen.blit(self.other_car, self.other_car_coordinates)
+        self.screen.blit(text_score, (0, 0))
         self.background_scroll_offset += 2
         if self.background_scroll_offset >= self.screen.get_size()[1]:
             self.background_scroll_offset = 0
@@ -186,6 +191,7 @@ class Game:
         self.handle_pressed_keys(self.car, self.car_coordinates, self.screen)
         self.other_car_coordinates[1] += 2
         if self.other_car_coordinates[1] == 30 + self.screen.get_size()[1]:
+            self.score = self.score + 1
             self.other_car_coordinates = [random.randrange(0, self.screen.get_size()[0]
                                                            - self.other_car.get_size()[0]), -200]
 
