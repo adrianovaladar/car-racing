@@ -3,7 +3,7 @@
 from unittest.mock import MagicMock
 from enum import Enum
 import pygame
-from main import Game, MOVE_STEP
+from main import Game, MOVE_STEP, SCORE_INCREMENT
 
 
 pygame.K_RIGHT = 0
@@ -104,15 +104,34 @@ def test_is_game_over():
     """Test for the case of game over equals true"""
     test_game = Game()
     test_game.car_coordinates = [2, 2]
-    test_game.other_car_coordinates = [2,2]
+    test_game.other_car_coordinates = [2, 2]
     assert test_game.is_game_over()
 
 
 def test_is_not__game_over():
     """Test for the case of game over equals true"""
     test_game = Game()
-    test_game.car_coordinates = [2,2]
+    test_game.car_coordinates = [2, 2]
     test_game.other_car_coordinates = [test_game.car.get_size()[0] + 100,
                                        test_game.car.get_size()[1] + 100]
     assert not test_game.is_game_over()
-    
+
+
+def test_increase_speed():
+    """Test if the speed increases when the score is equal to SCORE_INCREMENT"""
+    test_game = Game()
+    fps_before = test_game.fps
+    test_game.score = SCORE_INCREMENT
+    test_game.update_fps()
+    fps_after = test_game.fps
+    assert fps_after > fps_before
+
+
+def test_increase_speed_below_score_increment():
+    """Test if the speed increases when the score is equal to SCORE_INCREMENT - 1"""
+    test_game = Game()
+    fps_before = test_game.fps
+    test_game.score = SCORE_INCREMENT - 1
+    test_game.update_fps()
+    fps_after = test_game.fps
+    assert fps_after == fps_before

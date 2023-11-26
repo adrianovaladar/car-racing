@@ -32,6 +32,9 @@ MOVE_STEP = 5
 
 WIDTH = HEIGHT = 720
 
+SCORE_INCREMENT = 5
+FPS_INCREMENT = 60
+
 
 def text_format(message, text_font, text_size, text_color):
     """Format text for menu"""
@@ -77,6 +80,7 @@ class Game:
         self.other_car_coordinates = [random.randrange(0, self.screen.get_size()[0]
                                                        - self.other_car.get_size()[0]), -300]
         self.score = 0
+        self.fps = 60
 
     def handle_pressed_keys(self, car, car_coordinates, screen):
         """function to handle pressed keys"""
@@ -173,13 +177,19 @@ class Game:
                                        (rect_resume[2] / 2), 260))
         pygame.display.update()
 
+    def update_fps(self):
+        """This method checks if the score is a multiple of the SCORE_INCREMENT constant.
+        If it is, the fps is increased by the FPS_INCREMENT constant"""
+        if self.score % SCORE_INCREMENT == 0:
+            self.fps = self.fps + FPS_INCREMENT
+
     def run_game(self):
         """Function for running the game"""
         # RENDER YOUR GAME HERE
         self.screen.blit(self.background, (0, 0))
         scroll_y(self.screen, self.background_scroll_offset)
         text_score = text_format("SCORE: " + str(self.score), FONT, 25, yellow)
-        rect_score = text_score.get_rect()
+        # rect_score = text_score.get_rect()
         self.screen.blit(self.car, self.car_coordinates)
         self.screen.blit(self.other_car, self.other_car_coordinates)
         self.screen.blit(text_score, (0, 0))
@@ -192,6 +202,7 @@ class Game:
         self.other_car_coordinates[1] += 2
         if self.other_car_coordinates[1] == 30 + self.screen.get_size()[1]:
             self.score = self.score + 1
+            self.update_fps()
             self.other_car_coordinates = [random.randrange(0, self.screen.get_size()[0]
                                                            - self.other_car.get_size()[0]), -200]
 
@@ -225,7 +236,7 @@ class Game:
             elif self.game_status == GameStatus.QUIT:
                 self.running = False
 
-            self.clock.tick(60)  # limits FPS to 60
+            self.clock.tick(self.fps)
 
         pygame.quit()
 
