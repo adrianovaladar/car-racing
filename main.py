@@ -35,6 +35,8 @@ WIDTH = HEIGHT = 720
 SCORE_INCREMENT = 5
 FPS_INCREMENT = 60
 
+NUMBER_OTHER_CARS = 4
+
 
 def text_format(message, text_font, text_size, text_color):
     """Format text for menu"""
@@ -73,14 +75,64 @@ class Game:
         self.car = pygame.transform.smoothscale(self.car, (100, 200))
         self.car_coordinates = [(self.screen.get_size()[0] / 2) - (self.car.get_size()[0] / 2),
                                 self.screen.get_size()[1] - self.car.get_size()[1]]
-        self.other_car = pygame.image.load('images/other_car.png')
-        self.other_car = pygame.transform.smoothscale(self.other_car, (100, 200))
+        self.other_cars = []
+        self.other_cars_coordinates = []
+        for index in range(NUMBER_OTHER_CARS):
+            other_car = pygame.image.load('images/other_car.png')
+            other_car = pygame.transform.smoothscale(other_car, (100, 200))
+            self.other_cars.append(other_car)
+            self.other_cars_coordinates.append(self.generate_positions_other_cars(index))
+
         self.background = pygame.transform.smoothscale(self.background, self.screen.get_size())
         self.option_selected = OptionSelected.START
-        self.other_car_coordinates = [random.randrange(0, self.screen.get_size()[0]
-                                                       - self.other_car.get_size()[0]), -300]
         self.score = 0
         self.fps = 60
+
+    def generate_positions_other_cars(self, index):
+        """
+        Set position of list of other cars
+        Parameters:
+        - index: (int) index of the other car in the list (is it really necessary?)
+
+        Returns:
+        - coordinates: (list of floats): A list containing exactly two floats.
+        """
+        while True:
+            coordinates = [random.randrange(0, self.screen.get_size()[0]
+                                            - self.other_cars[index].get_size()[0]),
+                           random.randrange(-1000, -20)]
+            if self.is_position_valid(coordinates):
+                break
+        return coordinates
+
+    def is_position_valid(self, coordinates):
+        """
+        Checks if the coordinates given are valid
+
+        Parameters:
+        - coordinates: (list of floats): A list containing exactly two
+         floats that contains the values to be checked.
+
+        Returns:
+        bool: True if the coordinates represent a valid coordinate pair, False otherwise.
+        """
+        if (
+            coordinates[0] < self.car_coordinates[0] + self.car.get_size()[0] and
+            coordinates[0] + self.car.get_size()[0] > self.car_coordinates[0] and
+            coordinates[1] < self.car_coordinates[1] + self.car.get_size()[1] and
+            coordinates[1] + self.car.get_size()[1] > self.car_coordinates[1]
+        ):
+            return False
+
+        for existing_coordinates in self.other_cars_coordinates:
+            if (
+                coordinates[0] < existing_coordinates[0] + self.other_cars[0].get_size()[0] and
+                coordinates[0] + self.other_cars[0].get_size()[0] > existing_coordinates[0] and
+                coordinates[1] < existing_coordinates[1] + self.other_cars[0].get_size()[1] and
+                coordinates[1] + self.other_cars[0].get_size()[1] > existing_coordinates[1]
+            ):
+                return False
+        return True
 
     def handle_pressed_keys(self, car, car_coordinates, screen):
         """function to handle pressed keys"""
@@ -103,9 +155,11 @@ class Game:
         in order to play again from the same position"""
         self.car_coordinates = [(self.screen.get_size()[0] / 2) - (self.car.get_size()[0] / 2),
                                 self.screen.get_size()[1] - self.car.get_size()[1]]
-        self.other_car_coordinates = [random.randrange(0, self.screen.get_size()[0]
-                                                       - self.other_car.get_size()[0]), -300]
+        self.other_cars_coordinates.clear()
+        for index in range(NUMBER_OTHER_CARS):
+            self.other_cars_coordinates.append(self.generate_positions_other_cars(index))
         self.score = 0
+        self.fps = 60
 
     def main_menu(self):
         """Main menu function"""
@@ -154,15 +208,19 @@ class Game:
 
     def is_game_over(self):
         """Logic for game over"""
-        if (self.other_car_coordinates[0] <= self.car_coordinates[0] <=
-                self.other_car.get_size()[0] + self.other_car_coordinates[0] and
-                self.other_car_coordinates[1] <= self.car_coordinates[1]
-                <= self.other_car.get_size()[1] + self.other_car_coordinates[1] or
-                self.other_car_coordinates[0] <= self.car_coordinates[0] + self.car.get_size()[0] <=
-                self.other_car.get_size()[0] + self.other_car_coordinates[0] and
-                self.other_car_coordinates[1] <= self.car_coordinates[1] + self.car.get_size()[1]
-                <= self.other_car.get_size()[1] + self.other_car_coordinates[1]):
-            return True
+        for index in range(NUMBER_OTHER_CARS):
+            if (self.other_cars_coordinates[index][0] <= self.car_coordinates[0] <=
+                self.other_cars[index].get_size()[0] + self.other_cars_coordinates[index][0] and
+                self.other_cars_coordinates[index][1] <= self.car_coordinates[1]
+                <= self.other_cars[index].get_size()[1] + self.other_cars_coordinates[index][1] or
+                self.other_cars_coordinates[index][0] <= self.car_coordinates[0]
+                    + self.car.get_size()[0] <=
+                self.other_cars[index].get_size()[0] + self.other_cars_coordinates[index][0] and
+                self.other_cars_coordinates[index][1] <= self.car_coordinates[1]
+                    + self.car.get_size()[1]
+                <= self.other_cars[index].get_size()[1] + self.other_cars_coordinates[index][1]
+            ):
+                return True
         return False
 
     def screen_pause(self):
@@ -191,7 +249,8 @@ class Game:
         text_score = text_format("SCORE: " + str(self.score), FONT, 25, yellow)
         # rect_score = text_score.get_rect()
         self.screen.blit(self.car, self.car_coordinates)
-        self.screen.blit(self.other_car, self.other_car_coordinates)
+        for index in range(NUMBER_OTHER_CARS):
+            self.screen.blit(self.other_cars[index], self.other_cars_coordinates[index])
         self.screen.blit(text_score, (0, 0))
         self.background_scroll_offset += 2
         if self.background_scroll_offset >= self.screen.get_size()[1]:
@@ -199,12 +258,12 @@ class Game:
         # flip() the display to put your work on screen
         pygame.display.flip()
         self.handle_pressed_keys(self.car, self.car_coordinates, self.screen)
-        self.other_car_coordinates[1] += 2
-        if self.other_car_coordinates[1] == 30 + self.screen.get_size()[1]:
-            self.score = self.score + 1
-            self.update_fps()
-            self.other_car_coordinates = [random.randrange(0, self.screen.get_size()[0]
-                                                           - self.other_car.get_size()[0]), -200]
+        for index in range(NUMBER_OTHER_CARS):
+            self.other_cars_coordinates[index][1] += 2
+            if self.other_cars_coordinates[index][1] >= 30 + self.screen.get_size()[1]:
+                self.score = self.score + 1
+                self.update_fps()
+                self.other_cars_coordinates[index] = self.generate_positions_other_cars(index)
 
     def run(self):
         """game logic"""
