@@ -78,7 +78,7 @@ class Game:
         self.other_cars = []
         self.other_cars_coordinates = []
         for index in range(NUMBER_OTHER_CARS):
-            other_car = pygame.image.load('images/other_car.png')
+            other_car = pygame.image.load('images/other_car_' + str(index) + '.png')
             other_car = pygame.transform.smoothscale(other_car, (100, 200))
             self.other_cars.append(other_car)
             self.other_cars_coordinates.append(self.generate_positions_other_cars(index))
